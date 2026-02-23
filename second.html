@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Amit Emu 3D</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+/* ================= 3D BACKGROUND ================= */
+body{
+margin:0;
+font-family:Arial;
+overflow:hidden;
+color:white;
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:linear-gradient(145deg,#000000,#0a0a0a,#001a1a);
+perspective:1200px;
+position:relative;
+}
+
+/* ================= 🔵 SKYBLUE NEON CURSOR ================= */
+.cursor{
+position:fixed;
+width:28px;
+height:28px;
+border-radius:50%;
+background:#00c8ff;
+box-shadow:0 0 10px #00c8ff,
+0 0 25px #00c8ff,
+0 0 50px #00c8ff,
+0 0 100px #00c8ff;
+transform:translate(-50%,-50%);
+pointer-events:none;
+z-index:9999;
+animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+0%{transform:translate(-50%,-50%) scale(1); opacity:1;}
+50%{transform:translate(-50%,-50%) scale(1.4); opacity:0.6;}
+100%{transform:translate(-50%,-50%) scale(1); opacity:1;}
+}
+
+/* ================= ⚡ LIGHTNING ================= */
+.lightning{
+position:fixed;
+width:4px;
+height:60px;
+background:white;
+box-shadow:0 0 20px white,
+0 0 50px #00c8ff;
+pointer-events:none;
+animation:flash 0.3s ease-out forwards;
+z-index:9998;
+}
+
+@keyframes flash{
+from{transform:scaleY(1); opacity:1;}
+to{transform:scaleY(0); opacity:0;}
+}
+
+/* ================= ✨ SPARKS ================= */
+.spark{
+position:fixed;
+width:6px;
+height:6px;
+border-radius:50%;
+background:#00c8ff;
+box-shadow:0 0 10px #00c8ff;
+pointer-events:none;
+animation:sparkAnim 0.8s ease-out forwards;
+z-index:9998;
+}
+
+@keyframes sparkAnim{
+from{transform:scale(1) translateY(0); opacity:1;}
+to{transform:scale(3) translateY(-40px); opacity:0;}
+}
+
+/* ================= ADMIN PANEL ================= */
+.adminBtn{
+position:fixed;
+bottom:10px;
+left:10px;
+opacity:0.2;
+background:black;
+color:white;
+border:none;
+padding:5px 10px;
+cursor:pointer;
+}
+
+#adminPanel{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+color:white;
+padding:40px;
+z-index:10000;
+}
+
+#adminPanel input,
+#adminPanel button{
+padding:10px;
+margin:5px;
+}
+
+/* 🔥 EXE Upload */
+#currentFile{
+color:lime;
+}
+
+/* ================= 3D NAME ================= */
+h1{
+font-size:90px;
+letter-spacing:5px;
+color:#5ffcff;
+text-shadow:0 0 10px #00eaff,
+0 0 30px #00eaff;
+transform:translateZ(80px);
+transition:0.3s;
+cursor:pointer;
+}
+
+h1:hover{
+transform:translateZ(150px) scale(1.1);
+}
+
+/* ================= BUTTON ================= */
+.btn{
+padding:15px 40px;
+background:#00eaff;
+color:black;
+text-decoration:none;
+font-weight:bold;
+border-radius:15px;
+box-shadow:0 10px 0 #008c99,
+0 15px 30px rgba(0,0,0,0.6);
+transition:0.3s;
+transform:translateZ(40px);
+}
+
+.btn:hover{
+background:white;
+box-shadow:0 0 20px #00eaff,
+0 0 40px #00eaff,
+0 0 80px #00eaff;
+transform:translateZ(60px) scale(1.1);
+}
+
+/* ================= INFO ================= */
+.info{
+position:absolute;
+top:30px;
+left:30px;
+background:rgba(255,255,255,0.1);
+padding:15px;
+border-radius:15px;
+backdrop-filter:blur(10px);
+box-shadow:0 0 15px #00eaff;
+border-left:3px solid #00eaff;
+}
+
+/* ================= MUSIC ================= */
+.music{
+position:absolute;
+left:30px;
+bottom:30px;
+}
+
+.music button{
+padding:10px 20px;
+background:#00eaff;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 0 10px #00eaff;
+}
+
+/* ================= SOCIAL ================= */
+.social{
+position:absolute;
+right:30px;
+bottom:30px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.icon{
+font-size:30px;
+padding:12px;
+border-radius:15px;
+background:rgba(255,255,255,0.1);
+backdrop-filter:blur(10px);
+transition:0.4s;
+position:relative;
+overflow:hidden;
+}
+
+.youtube{color:red;}
+.discord{color:#5865F2;}
+.instagram{color:#e1306c;}
+
+.icon:hover{
+transform:scale(1.4) rotateY(15deg);
+box-shadow:0 0 20px currentColor,
+0 0 40px currentColor,
+0 0 80px currentColor;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- 🔥 ADMIN BUTTON -->
+<button class="adminBtn" onclick="openAdmin()">Admin</button>
+
+<!-- 🔥 ADMIN PANEL -->
+<div id="adminPanel">
+<h2>🔥 Admin Panel</h2>
+
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
+<button onclick="checkAdmin()">Login</button>
+
+<br><br>
+
+<h3>📁 Upload New EXE</h3>
+<input type="file" id="exeUpload">
+<button onclick="uploadExe()">Upload</button>
+
+<p>Current File: <span id="currentFile">myfile.exe</span></p>
+
+<br>
+
+<button onclick="resetVisitors()">Reset Visitors</button>
+<button onclick="closeAdmin()">Close</button>
+
+</div>
+
+<div class="info">
+👀 Visitors: <span id="visitors"></span>
+</div>
+
+<h1 onclick="secret()">Amit Emu</h1>
+
+<br>
+<a href="myfile.exe" download class="btn">Download EXE</a>
+
+<div class="music">
+<button onclick="toggleMusic()">Play / Pause</button>
+<br><br>
+<input type="range" min="0" max="1" step="0.1" value="1"
+onchange="setVolume(this.value)">
+</div>
+
+<div class="social">
+
+<a href="https://www.youtube.com/@AGAMIT4X?sub_confirmation=1" class="icon youtube">
+<i class="fab fa-youtube"></i>
+</a>
+
+<a href="https://discord.gg/PffmYVvetZ" class="icon discord">
+<i class="fab fa-discord"></i>
+</a>
+
+<a href="https://www.instagram.com/amit4xspeed/" class="icon instagram">
+<i class="fab fa-instagram"></i>
+</a>
+
+</div>
+
+<audio id="bgmusic" src="song.mp3" loop></audio>
+
+<script>
+
+/* Visitors */
+let visitors = localStorage.getItem("visitors");
+visitors = visitors ? parseInt(visitors)+1 : 1;
+localStorage.setItem("visitors",visitors);
+document.getElementById("visitors").innerText = visitors;
+
+/* Music */
+var music = document.getElementById("bgmusic");
+window.onload = ()=>{ music.play(); };
+
+function toggleMusic(){
+music.paused ? music.play() : music.pause();
+}
+
+function setVolume(v){
+music.volume = v;
+}
+
+/* Cursor */
+document.addEventListener("mousemove",(e)=>{
+let cur = document.getElementById("cursor");
+cur.style.left = e.clientX + "px";
+cur.style.top = e.clientY + "px";
+
+/* Sparks */
+for(let i=0;i<2;i++){
+let spark = document.createElement("div");
+spark.className = "spark";
+spark.style.left = (e.clientX + Math.random()*20) + "px";
+spark.style.top = (e.clientY + Math.random()*20) + "px";
+document.body.appendChild(spark);
+setTimeout(()=>spark.remove(),800);
+}
+});
+
+/* Lightning */
+document.addEventListener("click",(e)=>{
+let lightning = document.createElement("div");
+lightning.className = "lightning";
+lightning.style.left = e.clientX + "px";
+lightning.style.top = e.clientY + "px";
+document.body.appendChild(lightning);
+setTimeout(()=>lightning.remove(),300);
+});
+
+/* 🔥 ADMIN FUNCTIONS */
+function openAdmin(){
+document.getElementById("adminPanel").style.display="block";
+}
+
+function closeAdmin(){
+document.getElementById("adminPanel").style.display="none";
+}
+
+function checkAdmin(){
+let pass = document.getElementById("adminPass").value;
+if(pass==="1234123412341234"){
+alert("✅ Admin Access Granted");
+}
+else{
+alert("❌ Wrong Password");
+}
+}
+
+/* 🔥 EXE UPLOAD */
+function uploadExe(){
+let fileInput = document.getElementById("exeUpload");
+let file = fileInput.files[0];
+
+if(!file){
+alert("Select File First");
+return;
+}
+
+let url = URL.createObjectURL(file);
+localStorage.setItem("exeFile",url);
+localStorage.setItem("exeName",file.name);
+
+document.querySelector(".btn").href = url;
+document.getElementById("currentFile").innerText = file.name;
+
+alert("✅ EXE Uploaded");
+}
+
+/* Load Saved File */
+window.addEventListener("load",()=>{
+let saved = localStorage.getItem("exeFile");
+let name = localStorage.getItem("exeName");
+
+if(saved){
+document.querySelector(".btn").href = saved;
+document.getElementById("currentFile").innerText = name;
+}
+});
+
+function resetVisitors(){
+localStorage.setItem("visitors","0");
+alert("Visitors Reset");
+}
+
+function secret(){
+alert("🔥 Secret Mode Activated!");
+}
+
+</script>
+
+</body>
+</html>
